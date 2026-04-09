@@ -26,7 +26,7 @@ export default function ContextBuilder({
       try {
         const response = await listArtifacts({ q: query, limit: 8 });
         if (active) {
-          setItems(response.items);
+          setItems(Array.isArray(response.items) ? response.items : []);
         }
       } catch (err) {
         if (active) {
@@ -45,7 +45,8 @@ export default function ContextBuilder({
     };
   }, [query]);
 
-  const selectedItems = items.filter((item) => selectedIds.includes(item.id));
+  const safeItems = Array.isArray(items) ? items : [];
+  const selectedItems = safeItems.filter((item) => selectedIds.includes(item.id));
 
   const toggleSelection = (id: string) => {
     if (selectedIds.includes(id)) {
@@ -88,7 +89,7 @@ export default function ContextBuilder({
       {loading ? <div className="meta-placeholder">Loading context options...</div> : null}
       {error ? <div className="error-copy">{error}</div> : null}
 
-      {!loading && !items.length ? (
+      {!loading && !safeItems.length ? (
         <EmptyState
           title="No matching artifacts yet"
           body="Save outputs from writing, research, image, or finance and they will appear here for reuse."
@@ -96,8 +97,10 @@ export default function ContextBuilder({
         />
       ) : (
         <div className="context-grid">
-          {items.map((item) => {
+          {safeItems.map((item) => {
             const selected = selectedIds.includes(item.id);
+            const preview = item.summary ?? (String(item.content ?? "").slice(0, 120) || "No preview available.");
+            const tags = Array.isArray(item.tags) ? item.tags : [];
             return (
               <button
                 key={item.id}
@@ -109,9 +112,9 @@ export default function ContextBuilder({
                   <strong>{item.title}</strong>
                   <StatusBadge status={selected ? "connected" : "disconnected"} label={selected ? "Included" : item.studio} />
                 </div>
-                <p>{item.summary ?? item.content.slice(0, 120)}</p>
+                <p>{preview}</p>
                 <div className="context-option-tags">
-                  {item.tags.map((tag) => (
+                  {tags.map((tag) => (
                     <span key={tag}>#{tag}</span>
                   ))}
                 </div>

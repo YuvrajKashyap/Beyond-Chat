@@ -51,12 +51,23 @@ export default function ChatPage() {
   async function refreshThreads(selectedId?: string) {
     try {
       const response = await listChatThreads();
-      setThreads(response.threads);
-      const firstThread = response.threads[0];
+      const nextThreads = Array.isArray(response.threads) ? response.threads : [];
+      setThreads(nextThreads);
+      const firstThread = nextThreads[0];
       const targetId = selectedId ?? activeThread?.id ?? firstThread?.id;
       if (targetId) {
         const threadResponse = await getThread(targetId);
-        setActiveThread(threadResponse.thread);
+        const thread = threadResponse.thread;
+        setActiveThread(
+          thread
+            ? {
+                ...thread,
+                messages: Array.isArray(thread.messages) ? thread.messages : [],
+              }
+            : null,
+        );
+      } else {
+        setActiveThread(null);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load chat threads.");
@@ -64,10 +75,11 @@ export default function ChatPage() {
   }
 
   const groupedThreads = useMemo(() => {
+    const safeThreads = Array.isArray(threads) ? threads : [];
     return {
-      project: threads.filter((thread) => thread.collection_type === "project"),
-      group: threads.filter((thread) => thread.collection_type === "group"),
-      chat: threads.filter((thread) => thread.collection_type === "chat"),
+      project: safeThreads.filter((thread) => thread.collection_type === "project"),
+      group: safeThreads.filter((thread) => thread.collection_type === "group"),
+      chat: safeThreads.filter((thread) => thread.collection_type === "chat"),
     };
   }, [threads]);
 
@@ -92,7 +104,15 @@ export default function ChatPage() {
   const handleOpenThread = async (threadId: string) => {
     try {
       const response = await getThread(threadId);
-      setActiveThread(response.thread);
+      const thread = response.thread;
+      setActiveThread(
+        thread
+          ? {
+              ...thread,
+              messages: Array.isArray(thread.messages) ? thread.messages : [],
+            }
+          : null,
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to open thread.");
     }
@@ -140,7 +160,7 @@ export default function ChatPage() {
         models: availableModels,
         context_ids: selectedContextIds,
       });
-      setCompareResults(response.results);
+      setCompareResults(Array.isArray(response.results) ? response.results : []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Compare failed.");
     } finally {
