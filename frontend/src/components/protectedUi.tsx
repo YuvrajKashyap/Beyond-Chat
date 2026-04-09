@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import type {
   ButtonHTMLAttributes,
+  CSSProperties,
   InputHTMLAttributes,
   PropsWithChildren,
   ReactNode,
@@ -47,12 +48,16 @@ export function MotionCard({
   children,
   className = "",
   accent,
-}: PropsWithChildren<{ className?: string; accent?: string }>) {
+  style,
+}: PropsWithChildren<{ className?: string; accent?: string; style?: CSSProperties }>) {
   return (
     <motion.div
       variants={fadeUp}
       className={`glass-card ${className}`.trim()}
-      style={accent ? { boxShadow: `0 16px 40px ${accent}15`, borderColor: `${accent}30` } : undefined}
+      style={{
+        ...(accent ? { boxShadow: `0 16px 40px ${accent}15`, borderColor: `${accent}30` } : {}),
+        ...style,
+      }}
     >
       {children}
     </motion.div>

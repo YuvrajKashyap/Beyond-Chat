@@ -10,8 +10,6 @@ const MODELS = [
   { id: "google/gemini-2.0-flash-001", label: "Gemini Flash", color: "#4285F4" },
 ];
 
-const COMPARE_COLOR = "#8B5CF6";
-
 export default function ComparePage() {
   const [prompt, setPrompt] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set(MODELS.map((m) => m.id)));
