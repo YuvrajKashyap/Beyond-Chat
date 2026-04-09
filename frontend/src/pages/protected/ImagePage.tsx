@@ -48,7 +48,7 @@ export default function ImagePage() {
     void (async () => {
       try {
         const response = await listArtifacts({ studio: "image", limit: 24 });
-        if (active) setGallery(response.items);
+        if (active) setGallery(Array.isArray(response.items) ? response.items : []);
       } catch {
         if (active) setStatus("Could not load image history.");
       }
@@ -73,14 +73,18 @@ export default function ImagePage() {
       });
 
       const run = response.run;
+      if (!run) {
+        setStatus("Image run did not return a valid response.");
+        return;
+      }
       if (run.status === "failed") {
         setStatus(run.error_message ?? "Generation failed.");
         return;
       }
 
-      const urls = (run.output?.urls as string[] | undefined) ?? [];
+      const urls = Array.isArray(run.output?.urls) ? (run.output.urls as string[]) : [];
       const enhancedPrompt = (run.output?.enhanced_prompt as string | undefined) ?? prompt;
-      const paths = (run.output?.paths as string[] | undefined) ?? [];
+      const paths = Array.isArray(run.output?.paths) ? (run.output.paths as string[]) : [];
       setFreshImages(
         urls.map((url, index) => ({
           id: `${run.id}-${index}`,
@@ -100,6 +104,8 @@ export default function ImagePage() {
       setLoading(false);
     }
   };
+
+  const safeGallery = Array.isArray(gallery) ? gallery : [];
 
   return (
     <div className="page-wrap">
@@ -187,12 +193,12 @@ export default function ImagePage() {
               <p>Fresh results stay separate until you explicitly save them as artifacts.</p>
             </div>
             <StatusBadge
-              status={freshImages.length || gallery.length ? "connected" : "disconnected"}
-              label={`${freshImages.length + gallery.length} image${freshImages.length + gallery.length === 1 ? "" : "s"}`}
+              status={freshImages.length || safeGallery.length ? "connected" : "disconnected"}
+              label={`${freshImages.length + safeGallery.length} image${freshImages.length + safeGallery.length === 1 ? "" : "s"}`}
             />
           </div>
 
-          {freshImages.length || gallery.length ? (
+          {freshImages.length || safeGallery.length ? (
             <div className="stack-sm">
               {freshImages.length ? (
                 <>
@@ -243,11 +249,11 @@ export default function ImagePage() {
                 </>
               ) : null}
 
-              {gallery.length ? (
+              {safeGallery.length ? (
                 <>
                   <strong>Saved gallery</strong>
                   <div className="image-gallery-grid">
-                    {gallery.map((item) => (
+                    {safeGallery.map((item) => (
                       <div key={item.id} className="image-gallery-card">
                         <div
                           className={`image-gallery-preview${item.previewImage ? " image-gallery-preview--clickable" : ""}`}

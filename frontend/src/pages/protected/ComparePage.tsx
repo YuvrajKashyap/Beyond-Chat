@@ -35,8 +35,9 @@ export default function ComparePage() {
     try {
       const res = await comparePrompt({ prompt: prompt.trim(), models: Array.from(selected) });
       console.log("Got res from comparePrompt:", res);
-      setResults(res.results);
-      console.log("Set results!", res.results);
+      const nextResults = Array.isArray(res.results) ? res.results : [];
+      setResults(nextResults);
+      console.log("Set results!", nextResults);
     } catch (e: unknown) {
       console.error("Caught error in compare:", e);
       setError(e instanceof Error ? e.message : "Compare request failed");

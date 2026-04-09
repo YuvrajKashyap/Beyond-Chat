@@ -56,6 +56,11 @@ export default function RunStudioWorkspace({
         model,
         context_ids: contextIds,
       });
+      if (!response.run) {
+        setStatus("Run did not return a valid response.");
+        setRun(null);
+        return;
+      }
       setRun(response.run);
       setStatus(response.run.status);
     } catch (err) {

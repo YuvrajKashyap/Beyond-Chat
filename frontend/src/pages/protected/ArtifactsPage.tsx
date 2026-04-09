@@ -17,6 +17,8 @@ export default function ArtifactsPage() {
   const [studio, setStudio] = useState("all");
   const [type, setType] = useState("all");
   const [status, setStatus] = useState("Ready");
+  const safeItems = Array.isArray(items) ? items : [];
+  const activeTags = Array.isArray(activeItem?.tags) ? activeItem.tags : [];
 
   useEffect(() => {
     let active = true;
@@ -31,8 +33,9 @@ export default function ArtifactsPage() {
         if (!active) {
           return;
         }
-        setItems(response.items);
-        setActiveItem((current) => response.items.find((item) => item.id === current?.id) ?? response.items[0] ?? null);
+        const nextItems = Array.isArray(response.items) ? response.items : [];
+        setItems(nextItems);
+        setActiveItem((current) => nextItems.find((item) => item.id === current?.id) ?? nextItems[0] ?? null);
       } catch (err) {
         if (active) {
           setStatus(err instanceof Error ? err.message : "Failed to load artifacts.");
@@ -100,9 +103,9 @@ export default function ArtifactsPage() {
 
       <div className="artifact-layout">
         <MotionCard>
-          {items.length ? (
+          {safeItems.length ? (
             <div className="artifact-list">
-              {items.map((item) => (
+              {safeItems.map((item) => (
                 <button
                   key={item.id}
                   className={`artifact-row ${activeItem?.id === item.id ? "is-active" : ""}`}
@@ -111,7 +114,7 @@ export default function ArtifactsPage() {
                 >
                   <div>
                     <strong>{item.title}</strong>
-                    <p>{item.summary ?? item.content.slice(0, 140)}</p>
+                    <p>{item.summary ?? String(item.content ?? "").slice(0, 140)}</p>
                   </div>
                   <span>{item.studio}</span>
                 </button>
@@ -132,11 +135,11 @@ export default function ArtifactsPage() {
                 </div>
               </div>
               <div className="artifact-tag-row">
-                {activeItem.tags.map((tag) => (
+                {activeTags.map((tag) => (
                   <span key={tag}>#{tag}</span>
                 ))}
               </div>
-              <article className="report-output">{activeItem.content}</article>
+              <article className="report-output">{String(activeItem.content ?? "")}</article>
             </div>
           ) : (
             <EmptyState title="Select an artifact" body="The detail panel opens the currently highlighted artifact." />

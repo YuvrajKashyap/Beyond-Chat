@@ -51,6 +51,11 @@ export default function DataPage() {
           data_summary: `${fileName}: ${rows.length} rows x ${rows[0]?.length ?? 0} columns`,
         },
       });
+      if (!response.run) {
+        setRun(null);
+        setStatus("Data run did not return a valid response.");
+        return;
+      }
       setRun(response.run);
       setStatus(response.run.status);
     } catch (err) {

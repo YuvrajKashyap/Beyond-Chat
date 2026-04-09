@@ -26,7 +26,7 @@ export default function WritingHomePage() {
       try {
         const response = await listArtifacts({ studio: "writing", q: query, limit: 24 });
         if (active) {
-          setDocuments(response.items);
+          setDocuments(Array.isArray(response.items) ? response.items : []);
         }
       } catch (err) {
         if (active) {
@@ -40,6 +40,8 @@ export default function WritingHomePage() {
       active = false;
     };
   }, [query]);
+
+  const safeDocuments = Array.isArray(documents) ? documents : [];
 
   return (
     <div className="page-wrap">
@@ -92,28 +94,32 @@ export default function WritingHomePage() {
             <h3>Recent documents</h3>
             <p>Searchable writing artifacts ready to reopen.</p>
           </div>
-          <StatusBadge status="connected" label={`${documents.length} docs`} />
+          <StatusBadge status="connected" label={`${safeDocuments.length} docs`} />
         </div>
         <TextInput value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search documents..." />
       </MotionCard>
 
-      {documents.length ? (
+      {safeDocuments.length ? (
         <div className="document-grid">
-          {documents.map((document) => (
+          {safeDocuments.map((document) => {
+            const tags = Array.isArray(document.tags) ? document.tags : [];
+            const preview = document.summary ?? String(document.content ?? "").slice(0, 180);
+            return (
             <button key={document.id} className="document-card" onClick={() => navigate(`/writing/${document.id}`)} type="button">
               <div className="document-card-top">
                 <StatusBadge status="connected" label={document.contentFormat} />
                 <span>{new Date(document.updated_at).toLocaleDateString()}</span>
               </div>
               <strong>{document.title}</strong>
-              <p>{document.summary ?? document.content.slice(0, 180)}</p>
+              <p>{preview}</p>
               <div className="document-card-tags">
-                {document.tags.map((tag) => (
+                {tags.map((tag) => (
                   <span key={tag}>#{tag}</span>
                 ))}
               </div>
             </button>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <EmptyState

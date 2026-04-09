@@ -35,10 +35,10 @@ export default function HomePage() {
           return;
         }
 
-        setWorkspaceName(workspaceResponse.workspace.name);
-        setReminders(reminderResponse.items);
-        setProviders(providerResponse.providers);
-        setCalendarEvents(eventResponse.items);
+        setWorkspaceName(workspaceResponse.workspace?.name ?? "Beyond Chat");
+        setReminders(Array.isArray(reminderResponse.items) ? reminderResponse.items : []);
+        setProviders(providerResponse.providers && typeof providerResponse.providers === "object" ? providerResponse.providers : {});
+        setCalendarEvents(Array.isArray(eventResponse.items) ? eventResponse.items : []);
       } catch (err) {
         if (active) {
           setError(err instanceof Error ? err.message : "Failed to load dashboard.");
@@ -51,7 +51,7 @@ export default function HomePage() {
     };
   }, []);
 
-  const providerList = Object.entries(providers);
+  const providerList = Object.entries(providers ?? {});
 
   return (
     <motion.div className="page-wrap" variants={stagger} initial="hidden" animate="visible">

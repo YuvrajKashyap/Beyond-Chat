@@ -70,12 +70,17 @@ export default function WritingEditorPage() {
         if (!active) {
           return;
         }
-        setTitle(response.artifact.title);
+        const artifact = response.artifact;
+        if (!artifact) {
+          setStatusMessage("Could not load document. You can still create a new draft.");
+          return;
+        }
+        setTitle(artifact.title ?? "Untitled Document");
         if (editor) {
           editor.commands.setContent(
-            response.artifact.contentJson && typeof response.artifact.contentJson === "object"
-              ? response.artifact.contentJson
-              : markdownToHtml(response.artifact.content),
+            artifact.contentJson && typeof artifact.contentJson === "object"
+              ? artifact.contentJson
+              : markdownToHtml(String(artifact.content ?? "")),
           );
         }
       } catch {
@@ -112,6 +117,11 @@ export default function WritingEditorPage() {
         prompt: `Instruction: ${assistantPrompt}\n\nScope: ${assistantScope}\n\nDocument content:\n${sourceText}`,
         model: assistantModel,
       });
+      if (!response.run) {
+        setStatusMessage("Assistant run did not return a valid response.");
+        setAssistantDraft("");
+        return;
+      }
       const content = String(response.run.output.content ?? "");
       setAssistantDraft(content);
       setStatusMessage("Assistant suggestion generated. Review it before applying.");

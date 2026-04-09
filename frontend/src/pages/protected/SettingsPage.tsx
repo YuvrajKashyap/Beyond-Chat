@@ -28,8 +28,8 @@ export default function SettingsPage() {
       try {
         const [workspaceResponse, providersResponse] = await Promise.all([getWorkspace(), getProviderStatuses()]);
         if (active) {
-          setWorkspaceName(workspaceResponse.workspace.name);
-          setProviders(providersResponse.providers);
+          setWorkspaceName(workspaceResponse.workspace?.name ?? "Beyond Chat");
+          setProviders(providersResponse.providers && typeof providersResponse.providers === "object" ? providersResponse.providers : {});
         }
       } catch (err) {
         if (active) {
@@ -58,6 +58,7 @@ export default function SettingsPage() {
   };
 
   const bypassActive = mvpBypassActive || (isMvpBypassEnabled && isMvpBypassSessionActive());
+  const providerEntries = Object.entries(providers ?? {});
 
   return (
     <div className="page-wrap">
@@ -106,7 +107,7 @@ export default function SettingsPage() {
             </div>
           </div>
           <div className="stack-sm">
-            {Object.entries(providers).map(([key, provider]) => (
+            {providerEntries.map(([key, provider]) => (
               <div key={key} className="list-row">
                 <div>
                   <strong>{provider.label}</strong>
