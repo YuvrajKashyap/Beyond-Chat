@@ -9,13 +9,14 @@ function initials(name: string): string {
 }
 
 export function useOutputPresence(projectId: string | null, outputId: string | null): readonly CollaboratorView[] {
-  const [collaborators, setCollaborators] = useState<CollaboratorView[]>([]);
+  const scope = projectId && outputId ? `${projectId}:${outputId}` : null;
+  const [presence, setPresence] = useState<{ scope: string; collaborators: CollaboratorView[] }>({
+    scope: "",
+    collaborators: [],
+  });
 
   useEffect(() => {
-    if (!projectId || !outputId) {
-      setCollaborators([]);
-      return;
-    }
+    if (!projectId || !outputId || !scope) return;
     let stopped = false;
     const base = `/api/v2/product/projects/${encodeURIComponent(projectId)}/outputs/${encodeURIComponent(outputId)}/realtime-hints`;
     const heartbeat = async () => {
@@ -28,15 +29,18 @@ export function useOutputPresence(projectId: string | null, outputId: string | n
     const refresh = async () => {
       const response = await sessionRequest<{ items: ProductRecordSummary[] }>(base).catch(() => ({ items: [] }));
       if (stopped) return;
-      setCollaborators(response.items.map((item) => {
-        const name = String(item.payload["actor_name"] ?? "Organization member");
-        return { id: String(item.payload["actor_id"] ?? item.created_by ?? item.id), name, initials: initials(name), state: "active", location: String(item.payload["reason"] ?? "Output") };
-      }));
+      setPresence({
+        scope,
+        collaborators: response.items.map((item) => {
+          const name = String(item.payload["actor_name"] ?? "Organization member");
+          return { id: String(item.payload["actor_id"] ?? item.created_by ?? item.id), name, initials: initials(name), state: "active", location: String(item.payload["reason"] ?? "Output") };
+        }),
+      });
     };
     void heartbeat().then(refresh);
     const timer = window.setInterval(() => { void heartbeat().then(refresh); }, 20_000);
     return () => { stopped = true; window.clearInterval(timer); };
-  }, [projectId, outputId]);
+  }, [projectId, outputId, scope]);
 
-  return collaborators;
+  return scope && presence.scope === scope ? presence.collaborators : [];
 }
