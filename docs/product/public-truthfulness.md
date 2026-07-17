@@ -1,10 +1,10 @@
 # Public product truthfulness
 
-`plan.md` is the canonical product and architecture plan. This note records the public-surface rules for the transitional prototype and should be updated when an implementation is verified.
+`plan.md` is the canonical repository-level product and architecture contract. This note records the public-surface rules for the transitional product and should be updated when an implementation is verified.
 
 ## Current public position
 
-- Beyond Chat is a transitional prototype moving from studio-centric UI toward a project- and organization-centered AI work environment.
+- Beyond Chat is a working pre-production product moving from its earlier studio-centric UI toward a project- and organization-centered AI work environment.
 - Existing chat, run-step, artifact, research, finance, image, and data flows are prototype behavior. They are not promises about final navigation, provider availability, or future packaging.
 - Public pages must not list specific model vendors or model versions as generally available unless the current product verifies that availability.
 - Public pages must not claim unlimited usage, a free trial, savings, customer results, autonomous completion times, or live connector coverage without current evidence.
@@ -20,4 +20,11 @@
 
 ## Architecture language
 
-Public and repository documentation may describe current prototype infrastructure only when it is clearly marked transitional. The locked target architecture and migration direction live in `plan.md`; current Supabase Auth, legacy schema, studio navigation, OpenRouter wiring, and Vercel Sandbox assumptions must not be presented as the final product architecture.
+Public and repository documentation may describe current infrastructure when it is clearly separated from unverified production readiness and future direction. The current architecture contract lives in `plan.md`; legacy Supabase Auth, legacy schema, studio navigation, and earlier sandbox assumptions must not be presented as the final product architecture.
+
+## Recruiter showcase
+
+- `/showcase` is a public, read-only product walkthrough with synthetic data.
+- The route must remain visually and technically distinct from an authenticated workspace session.
+- It must not call authenticated product APIs, expose account or provider data, bypass `ProtectedRoute`, or claim that synthetic records were created by the live backend.
+- Screenshots captured from the route must retain the synthetic-data disclosure.

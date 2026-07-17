@@ -37,6 +37,7 @@ const AuthCallbackPage = lazy(() => import("../pages/public/AuthCallbackPage"));
 const BillingSuccessPage = lazy(() => import("../pages/public/BillingSuccessPage"));
 const TermsPage = lazy(() => import("../pages/public/TermsPage"));
 const PrivacyPage = lazy(() => import("../pages/public/PrivacyPage"));
+const RecruiterShowcasePage = lazy(() => import("../pages/public/RecruiterShowcasePage"));
 const ForgotPasswordPage = lazy(() => import("../pages/public/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("../pages/public/ResetPasswordPage"));
 
@@ -69,7 +70,7 @@ function ScrollToTop() {
 
 function CursorMount() {
   const { pathname } = useLocation();
-  const usePageCursor = pathname === "/" || pathname === "/pricing";
+  const usePageCursor = pathname === "/" || pathname === "/pricing" || pathname === "/showcase";
 
   if (usePageCursor) {
     return null;
@@ -98,6 +99,7 @@ export default function AppShell() {
               <Route path="/billing/cancel" element={<Navigate to="/pricing" replace />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/showcase" element={<RecruiterShowcasePage />} />
 
               {/* Temporary dashboard design previews — full-bleed, no DashboardLayout chrome */}
               <Route path="/designs/1" element={<ProtectedRoute><Design1Executive /></ProtectedRoute>} />
